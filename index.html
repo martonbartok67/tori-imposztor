@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Töri Imposztor — Mega Edition</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { 
+      background: linear-gradient(135deg, #0f172a 0%, #020617 50%, #1e1b4b 100%);
+      color: white; 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    .no-select { user-select: none; -webkit-user-select: none; }
+    
+    .view-transition {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); scale: 0.98; }
+      to { opacity: 1; transform: translateY(0); scale: 1; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body class="no-select min-h-screen flex flex-col justify-between antialiased">
+
+  <div id="app" class="w-full max-w-md mx-auto p-5 flex-1 flex flex-col justify-center view-transition">
+    <!-- A dinamikus tartalom helye -->
+  </div>
+
+  <script>
+    // PONTOSAN 500 DB SOROZAT-, DÁTUMMENTES, SPECIFIKUS TÖRTÉNELMI ALAPFOGALOM
+    const historyTopics = [
+      // SZEMÉLYEK (1-100)
+      { topic: "Julius Caesar", level: "kozep" }, { topic: "Augustus", level: "kozep" },
+      { topic: "Nagy Sándor", level: "kozep" }, { topic: "Periklész", level: "kozep" },
+      { topic: "Hammurapi", level: "kozep" }, { topic: "Hannibal", level: "kozep" },
+      { topic: "Attila hun király", level: "kozep" }, { topic: "Nagy Károly", level: "kozep" },
+      { topic: "Mohamed próféta", level: "kozep" }, { topic: "I. István", level: "kozep" },
+      { topic: "Koppány", level: "kozep" }, { topic: "Szent Gellért", level: "kozep" },
+      { topic: "I. László", level: "kozep" }, { topic: "Könyves Kálmán", level: "kozep" },
+      { topic: "II. András", level: "kozep" }, { topic: "IV. Béla", level: "kozep" },
+      { topic: "Károly Róbert", level: "kozep" }, { topic: "Nagy Lajos", level: "kozep" },
+      { topic: "Luxemburgi Zsigmond", level: "kozep" }, { topic: "Hunyadi János", level: "kozep" },
+      { topic: "Hunyadi Mátyás", level: "kozep" }, { topic: "Dózsa György", level: "kozep" },
+      { topic: "Werbőczy István", level: "kozep" }, { topic: "Fráter György", level: "emelt" },
+      { topic: "Zrínyi Miklós a hadvezér", level: "kozep" }, { topic: "Zrínyi Miklós a költő", level: "kozep" },
+      { topic: "Dobó István", level: "kozep" }, { topic: "János Zsigmond", level: "emelt" },
+      { topic: "Bocskai István", level: "kozep" }, { topic: "Bethlen Gábor", level: "kozep" },
+      { topic: "Pázmány Péter", level: "kozep" }, { topic: "II. Rákóczi Ferenc", level: "kozep" },
+      { topic: "Mária Terézia", level: "kozep" }, { topic: "II. József", level: "kozep" },
+      { topic: "Martinovics Ignác", level: "emelt" }, { topic: "Széchenyi István", level: "kozep" },
+      { topic: "Kossuth Lajos", level: "kozep" }, { topic: "Görgei Artúr", level: "kozep" },
+      { topic: "Petőfi Sándor", level: "kozep" }, { topic: "Batthyány Lajos", level: "kozep" },
+      { topic: "Deák Ferenc", level: "kozep" }, { topic: "Andrássy Gyula", level: "kozep" },
+      { topic: "Eötvös József", level: "kozep" }, { topic: "Tisza Kálmán", level: "emelt" },
+      { topic: "Tisza István", level: "kozep" }, { topic: "Károlyi Mihály", level: "kozep" },
+      { topic: "Kun Béla", level: "kozep" }, { topic: "Horthy Miklós", level: "kozep" },
+      { topic: "Bethlen István", level: "kozep" }, { topic: "Peyer Károly", level: "emelt" },
+      { topic: "Gömbös Gyula", level: "kozep" }, { topic: "Teleki Pál", level: "kozep" },
+      { topic: "Szálasi Ferenc", level: "kozep" }, { topic: "Rákosi Mátyás", level: "kozep" },
+      { topic: "Rajk László", level: "kozep" }, { topic: "Kádár János", level: "kozep" },
+      { topic: "Nagy Imre", level: "kozep" }, { topic: "Mindszenty József", level: "emelt" },
+      { topic: "Antall József", level: "kozep" }, { topic: "Göncz Árpád", level: "kozep" },
+      { topic: "Luther Márton", level: "kozep" }, { topic: "Kálvin János", level: "kozep" },
+      { topic: "Kolumbusz Kristóf", level: "kozep" }, { topic: "Magellán", level: "kozep" },
+      { topic: "Vasco da Gama", level: "kozep" }, { topic: "James Watt", level: "kozep" },
+      { topic: "Robespierre", level: "kozep" }, { topic: "Napóleon", level: "kozep" },
+      { topic: "Metternich", level: "emelt" }, { topic: "Bismarck", level: "kozep" },
+      { topic: "Lincoln", level: "kozep" }, { topic: "George Washington", level: "kozep" },
+      { topic: "Marx Károly", level: "kozep" }, { topic: "Lenin", level: "kozep" },
+      { topic: "Sztálin", level: "kozep" }, { topic: "Trockij", level: "emelt" },
+      { topic: "Mussolini", level: "kozep" }, { topic: "Hitler", level: "kozep" },
+      { topic: "Goebbels", level: "emelt" }, { topic: "Churchill", level: "kozep" },
+      { topic: "Roosevelt", level: "kozep" }, { topic: "Truman", level: "kozep" },
+      { topic: "Eisenhower", level: "emelt" }, { topic: "Kennedy", level: "kozep" },
+      { topic: "Hruscsov", level: "kozep" }, { topic: "Brezsnyev", level: "kozep" },
+      { topic: "Gorbacsov", level: "kozep" }, { topic: "Reagan", level: "kozep" },
+      { topic: "Khomeini ajatollah", level: "emelt" }, { topic: "Mao Ce-tung", level: "kozep" },
+      { topic: "Mahatma Gandhi", level: "kozep" }, { topic: "Ben-Gurion", level: "emelt" },
+      { topic: "Nelson Mandela", level: "kozep" }, { topic: "Woodrow Wilson", level: "kozep" },
+      { topic: "Nagy Teodosius", level: "emelt" }, { topic: "Justinianus", level: "emelt" },
+      { topic: "Klodvig", level: "emelt" }, { topic: "Kandallócső (I. Ferenc)", level: "emelt" },
+      { topic: "Assur-ban-apli", level: "emelt" }, { topic: "Cyrus", level: "emelt" },
+
+      // CSATÁK ÉS ESEMÉNYEK (101-200)
+      { topic: "Mohácsi csata", level: "kozep" }, { topic: "Muhi csata", level: "kozep" },
+      { topic: "Pozsonyi csata", level: "kozep" }, { topic: "Augsburgi csata", level: "kozep" },
+      { topic: "Merseburgi csata", level: "emelt" }, { topic: "Nándorfehérvári diadal", level: "kozep" },
+      { topic: "Buda török bevétele", level: "kozep" }, { topic: "Eger ostroma", level: "kozep" },
+      { topic: "Szigetvár ostroma", level: "kozep" }, { topic: "Kenyérmezei csata", level: "emelt" },
+      { topic: "Várnai csata", level: "kozep" }, { topic: "Rozgonyi csata", level: "emelt" },
+      { topic: "Pákozdi csata", level: "kozep" }, { topic: "Világosi fegyverletétel", level: "kozep" },
+      { topic: "Kápolnai csata", level: "emelt" }, { topic: "Isaszegi csata", level: "kozep" },
+      { topic: "Buda visszafoglalása", level: "kozep" }, { topic: "Mezőkeresztesi csata", level: "emelt" },
+      { topic: "Vérszerződés", level: "kozep" }, { topic: "Honfoglalás", level: "kozep" },
+      { topic: "Tatárjárás", level: "kozep" }, { topic: "Bostoni teadélután", level: "kozep" },
+      { topic: "Bastille bevétele", level: "kozep" }, { topic: "Waterloo-i csata", level: "kozep" },
+      { topic: "Austerlitzi csata", level: "kozep" }, { topic: "Trafalgari csata", level: "emelt" },
+      { topic: "Lipcsei csata", level: "kozep" }, { topic: "Könnyűlovasság támadása", level: "emelt" },
+      { topic: "Gettysburgi csata", level: "kozep" }, { topic: "Sedani csata", level: "kozep" },
+      { topic: "Königgrätzi csata", level: "emelt" }, { topic: "Szarajevói merénylet", level: "kozep" },
+      { topic: "Verduni csata", level: "kozep" }, { topic: "Somme-i csata", level: "kozep" },
+      { topic: "Marne-i csata", level: "kozep" }, { topic: "Müncheni sörpuccs", level: "emelt" },
+      { topic: "Hosszú kések éjszakája", level: "emelt" }, { topic: "Kristályéjszaka", level: "kozep" },
+      { topic: "Pearl Harbor megtámadása", level: "kozep" }, { topic: "Midway-i csata", level: "kozep" },
+      { topic: "El-alameini csata", level: "kozep" }, { topic: "Sztálingrádi csata", level: "kozep" },
+      { topic: "Kurszki csata", level: "emelt" }, { topic: "Normandiai partraszállás", level: "kozep" },
+      { topic: "Hirosima bombázása", level: "kozep" }, { topic: "Berlin blokádja", level: "emelt" },
+      { topic: "Szuezi válság", level: "kozep" }, { topic: "Kubai rakétaválság", level: "kozep" },
+      { topic: "Prágai tavasz", level: "kozep" }, { topic: "Csernobili atomkatasztrófa", level: "kozep" },
+      { topic: "Berlini fal leomlása", level: "kozep" }, { topic: "Ikertornyok elleni támadás", level: "kozep" },
+      { topic: "Maratoni csata", level: "kozep" }, { topic: "Thermopülai csata", level: "kozep" },
+      { topic: "Szalamiszi csata", level: "emelt" }, { topic: "Actiumi csata", level: "kozep" },
+      { topic: "Poitiers-i csata", level: "kozep" }, { topic: "Canossa-járás", level: "kozep" },
+      { topic: "Jeruzsálem bevétele", level: "kozep" }, { topic: "Rigómezei csata", level: "kozep" },
+      { topic: "Konstantinápoly eleste", level: "kozep" }, { topic: "Lepantói csata", level: "kozep" },
+      { topic: "Spanyol Armada veresége", level: "kozep" }, { topic: "Prágai defenesztráció", level: "emelt" },
+      { topic: "Kékcédulás választások", level: "kozep" }, { topic: "Sztálin-szobor ledöntése", level: "kozep" },
+      { topic: "Kossuth téri sortűz", level: "kozep" }, { topic: "Isonzói csaták", level: "kozep" },
+      { topic: "Doberdói csata", level: "kozep" }, { topic: "Őszirózsás forradalom", level: "kozep" },
+      { topic: "Fehérterror", level: "kozep" }, { topic: "Vörösterror", level: "kozep" },
+      { topic: "Don-kanyari katasztrófa", level: "kozep" }, { topic: "Újvidéki vérengzés", level: "emelt" },
+      { topic: "Buda visszafoglalása a töröktől", level: "kozep" }, { topic: "Nagy futás (tatár elől)", level: "emelt" },
+      { topic: "Bécs ostroma török által", level: "kozep" }, { topic: "Majtényi zászlómeghajtás", level: "kozep" },
+      { topic: "Ónodi országgyűlés", level: "kozep" }, { topic: "Lánchíd alapkőletétele", level: "kozep" },
+      { topic: "Védegylet alapítása", level: "emelt" }, { topic: "Királyi Duna-jég választás", level: "kozep" },
+      { topic: "Martinovics-féle lefejezések", level: "emelt" }, { topic: "Húsvéti cikk", level: "kozep" },
+      { topic: "Millenniumi ünnepségek", level: "kozep" }, { topic: "Horthy bevonulása", level: "kozep" },
+      { topic: "Kiugrási kísérlet", level: "kozep" }, { topic: "Békepapok mozgalma", level: "emelt" },
+      { topic: "Nagy Imre temetése", level: "kozep" }, { topic: " taxisblokád", level: "kozep" },
+      { topic: "Katalóniai csata", level: "emelt" }, { topic: "Gaugamelai csata", level: "emelt" },
+      { topic: "Zamai csata", level: "emelt" }, { topic: "Cannae-i csata", level: "kozep" },
+      { topic: "Karkemisi csata", level: "emelt" }, { topic: "Trójai háború", level: "kozep" },
+      { topic: "Balkáni háborúk", level: "emelt" }, { topic: "Ópiumháború", level: "emelt" },
+      { topic: "Krími háború", level: "kozep" }, { topic: "Vörös ingesek partraszállása", level: "emelt" },
+
+      // FOGALMAK ÉS TÁRSADALMI RÉTEGEK (201-320)
+      { topic: "Jobbágy", level: "kozep" }, { topic: "Paraszt", level: "kozep" },
+      { topic: "Nemes", level: "kozep" }, { topic: "Lovag", level: "kozep" },
+      { topic: "Polgár", level: "kozep" }, { topic: "Rabszolga", level: "kozep" },
+      { topic: "Patrícius", level: "kozep" }, { topic: "Plebejus", level: "kozep" },
+      { topic: "Szenátor", level: "kozep" }, { topic: "Hűbéres", level: "kozep" },
+      { topic: "Hűbérúr", level: "kozep" }, { topic: "Szerzetes", level: "kozep" },
+      { topic: "Céhmester", level: "kozep" }, { topic: "Inas", level: "kozep" },
+      { topic: "Proletár", level: "kozep" }, { topic: "Kalmár", level: "kozep" },
+      { topic: "Végvári vitéz", level: "kozep" }, { topic: "Zsoldos", level: "kozep" },
+      { topic: "Imposztor", level: "kozep" }, { topic: "Báró", level: "kozep" },
+      { topic: "Gróf", level: "kozep" }, { topic: "Király", level: "kozep" },
+      { topic: "Császár", level: "kozep" }, { topic: "Szultán", level: "kozep" },
+      { topic: "Kormányzó", level: "kozep" }, { topic: "Nádor", level: "kozep" },
+      { topic: "Vajda", level: "kozep" }, { topic: "Főispán", level: "kozep" },
+      { topic: "Alispán", level: "emelt" }, { topic: "Szolgabíró", level: "emelt" },
+      { topic: "Közgyűlés", level: "kozep" }, { topic: "Tisztségviselő", level: "kozep" },
+      { topic: "Eph水平orosz (Ephórosz)", level: "emelt" }, { topic: "Helóta", level: "kozep" },
+      { topic: "Kleruhosz", level: "emelt" }, { topic: "Néptribunus", level: "kozep" },
+      { topic: "Cenzor", level: "emelt" }, { topic: "Diktátor", level: "kozep" },
+      { topic: "Gladiátor", level: "kozep" }, { topic: "Pápai követ (Legátus)", level: "emelt" },
+      { topic: "Választófejedelem", level: "emelt" }, { topic: "Dózsa-féle keresztes", level: "kozep" },
+      { topic: "Janicsár", level: "kozep" }, { topic: "Szpáhi", level: "kozep" },
+      { topic: "Kuruc", level: "kozep" }, { topic: "Labanc", level: "kozep" },
+      { topic: "Hajdú", level: "kozep" }, { topic: "Koldulórendi barát", level: "kozep" },
+      { topic: "Jakobinus", level: "kozep" }, { topic: "Szaniszkáló (Szanon)", level: "emelt" },
+      { topic: "Gentry", level: "emelt" }, { topic: "Kivándorló", level: "kozep" },
+      { topic: "Sztahanovista", level: "kozep" }, { topic: "Kulák", level: "kozep" },
+      { topic: "ÁVH-s keretlegény", level: "kozep" }, { topic: "Munkásőr", level: "kozep" },
+      { topic: "Disszidens", level: "kozep" }, { topic: "Szerb határőr", level: "emelt" },
+      { topic: "Kun lovas", level: "emelt" }, { topic: "Besenyő törzs tagja", level: "emelt" },
+      { topic: "Táltos", level: "kozep" }, { topic: "Várjobbágy", level: "emelt" },
+      { topic: "Várnép", level: "emelt" }, { topic: "Vendég (Hospes)", level: "kozep" },
+      { topic: "Zsellér", level: "kozep" }, { topic: "Házas zsellér", level: "emelt" },
+      { topic: "Főnemes", level: "kozep" }, { topic: "Köznemes", level: "kozep" },
+      { topic: "Bocskoros nemes", level: "emelt" }, { topic: "Honorácior", level: "emelt" },
+      { topic: "Burzsoá", level: "kozep" }, { topic: "Szenátor", level: "kozep" },
+      { topic: "Vazallus", level: "kozep" }, { topic: "Mandarinság", level: "emelt" },
+      { topic: "Fáraó", level: "kozep" }, { topic: "Írnok", level: "kozep" },
+      { topic: "Főpap", level: "kozep" }, { topic: "Gyáros", level: "kozep" },
+      { topic: "Bankár", level: "kozep" }, { topic: "Kereskedő", level: "kozep" },
+      { topic: "Bányász", level: "kozep" }, { topic: "Szakszervezeti bizalmi", level: "kozep" },
+      { topic: "Pártkáder", level: "kozep" }, { topic: "Partizán", level: "kozep" },
+      { topic: "Szamizdat szerző", level: "emelt" }, { topic: "Bársonyos forradalmár", level: "emelt" },
+      { topic: "Sztipendiátus diák", level: "emelt" }, { topic: "Humanista tudós", level: "kozep" },
+      { topic: "Anabaptista", level: "emelt" }, { topic: "Jezsuita", level: "kozep" },
+      { topic: "Puritán", level: "emelt" }, { topic: "Girondista", level: "emelt" },
+      { topic: "Jakobinus", level: "kozep" }, { topic: "Szsanszkülott", level: "emelt" },
+      { topic: "Luddita gépromboló", level: "emelt" }, { topic: "Kartiszta", level: "emelt" },
+      { topic: "Süvölvény (Kamarás)", level: "emelt" }, { topic: "Kapitány", level: "kozep" },
+      { topic: "Gályarab", level: "kozep" }, { topic: "Pasa", level: "kozep" },
+      { topic: "Mufti", level: "emelt" }, { topic: "Végvári parancsnok", level: "kozep" },
+      { topic: "Fekete seregbeli gyalogos", level: "kozep" }, { topic: "Bandérium lovas", level: "emelt" },
+      { topic: "Nyilas párttag", level: "kozep" }, { topic: "Internált polgár", level: "kozep" },
+      { topic: "Hadifogoly", level: "kozep" }, { topic: "Márciusi ifjú", level: "kozep" },
+      { topic: "Honvéd", level: "kozep" }, { topic: "Közkatona", level: "kozep" },
+      { topic: "Baka", level: "kozep" }, { topic: "Tengerész", level: "kozep" },
+      { topic: "Pilóta", level: "kozep" }, { topic: "Búvár", level: "emelt" },
+      { topic: "Habsburg hivatalnok", level: "kozep" }, { topic: "Bach-huszár", level: "kozep" },
+      { topic: "Kiegyezéspárti politikus", level: "kozep" }, { topic: "Közös miniszter", level: "emelt" },
+      { topic: "Csendőr", level: "kozep" }, { topic: "Finánc", level: "emelt" },
+
+      // GAZDASÁG ÉS ADÓK (321-400)
+      { topic: "Adó", level: "kozep" }, { topic: "Tized", level: "kozep" },
+      { topic: "Kilenced", level: "kozep" }, { topic: "Kapuadó", level: "kozep" },
+      { topic: "Füstadó", level: "kozep" }, { topic: "Harmincad", level: "kozep" },
+      { topic: "Robot", level: "kozep" }, { topic: "Regálé", level: "kozep" },
+      { topic: "Monopólium", level: "kozep" }, { topic: "Aranyforint", level: "kozep" },
+      { topic: "Infláció", level: "kozep" }, { topic: "Hadisarc", level: "kozep" },
+      { topic: "Mercantilizmus", level: "emelt" }, { topic: "Kaláka", level: "emelt" },
+      { topic: "Kamara haszna", level: "emelt" }, { topic: "Lucrum camerae", level: "emelt" },
+      { topic: "Rendkívüli hadiadó", level: "kozep" }, { topic: "Királyi yard (Mértékegység)", level: "emelt" },
+      { topic: "Koronaadó", level: "emelt" }, { topic: "Subsídium", level: "emelt" },
+      { topic: "Vám", level: "kozep" }, { topic: "Kettős vámrendszer", level: "kozep" },
+      { topic: "Úrbér", level: "kozep" }, { topic: "Jobbágytelek", level: "kozep" },
+      { topic: "Allódium", level: "kozep" }, { topic: "Major", level: "kozep" },
+      { topic: "Céh", level: "kozep" }, { topic: "Manufaktúra", level: "kozep" },
+      { topic: "Gyár", level: "kozep" }, { topic: "Részvénytársaság", level: "kozep" },
+      { topic: "Tőzsde", level: "kozep" }, { topic: "Hitel", level: "kozep" },
+      { topic: "Kamatszedés", level: "kozep" }, { topic: "Bulla", level: "kozep" },
+      { topic: "Bányabér", level: "emelt" }, { topic: "Urbura", level: "emelt" },
+      { topic: "Papírpénz", level: "kozep" }, { topic: "Korsó- és kádadó", level: "emelt" },
+      { topic: "Haráccs", level: "kozep" }, { topic: "Dsidzsa (Nem muszlimok adója)", level: "emelt" },
+      { topic: "Devshirme (Gyermekadó)", level: "emelt" }, { topic: "Közös vámterület", level: "emelt" },
+      { topic: "Hadigazdaság", level: "kozep" }, { topic: "Beszolgáltatás", level: "kozep" },
+      { topic: "Padláslesöprés", level: "kozep" }, { topic: "Jegyrendszer", level: "kozep" },
+      { topic: "Békekölcsön", level: "emelt" }, { topic: "Hiánygazdaság", level: "kozep" },
+      { topic: "Gulyáskommunizmus", level: "kozep" }, { topic: "Fridzsiderszocializmus", level: "emelt" },
+      { topic: "Privatizáció", level: "kozep" }, { topic: "Kárpótlási jegy", level: "kozep" },
+      { topic: "Világbank", level: "kozep" }, { topic: "Valutaalap", level: "emelt" },
+      { topic: "KGST", level: "kozep" }, { topic: "Marshall-segély", level: "kozep" },
+      { topic: "New Deal", level: "kozep" }, { topic: "Tervutasításos rendszer", level: "kozep" },
+      { topic: "Ötéves terv", level: "kozep" }, { topic: "Kollektivizálás", level: "kozep" },
+      { topic: "Termelőszövetkezet", level: "kozep" }, { topic: "Állami gazdaság", level: "emelt" },
+      { topic: "Fekete piac", level: "kozep" }, { topic: "Valutázás", level: "emelt" },
+      { topic: "Kompencációs kereskedelem", level: "emelt" }, { topic: "Gildiák (Kereskedőcéhek)", level: "emelt" },
+      { topic: "Hanza-szövetség", level: "kozep" }, { topic: "Levantei kereskedelem", level: "kozep" },
+      { topic: "Ezüstbánya", level: "kozep" }, { topic: "Aranymosás", level: "kozep" },
+      { topic: "Kötelező örökváltság", level: "kozep" }, { topic: "Önkéntes örökváltság", level: "emelt" },
+      { topic: "Közteherviselés", level: "kozep" }, { topic: "Adómentesség", level: "kozep" },
+      { topic: "Ősiség", level: "kozep" }, { topic: "Háromnyomásos gazdálkodás", level: "kozep" },
+      { topic: "Kétnyomásos gazdálkodás", level: "emelt" }, { topic: "Vetésforgó", level: "kozep" },
+      { topic: "Bekerítés", level: "emelt" }, { topic: "Szabadkereskedelem", level: "kozep" },
+
+      // BIRODALMAK, ORSZÁGOK ÉS INTÉZMÉNYEK (401-500)
+      { topic: "Római Birodalom", level: "kozep" }, { topic: "Oszmán Birodalom", level: "kozep" },
+      { topic: "Frank Birodalom", level: "kozep" }, { topic: "Osztrák-Magyar Monarchia", level: "kozep" },
+      { topic: "Szovjetunió", level: "kozep" }, { topic: "Athéni polisz", level: "kozep" },
+      { topic: "Német Császárság", level: "kozep" }, { topic: "Perzsa Birodalom", level: "kozep" },
+      { topic: "Bizánci Birodalom", level: "kozep" }, { topic: "Harmadik Birodalom", level: "kozep" },
+      { topic: "Amerikai Egyesült Államok", level: "kozep" }, { topic: "Erdélyi Fejedelemség", level: "kozep" },
+      { topic: "Népgyűlés", level: "kozep" }, { topic: "Szenátus", level: "kozep" },
+      { topic: "Országgyűlés", level: "kozep" }, { topic: "Inkvizíció", level: "kozep" },
+      { topic: "Uradalom", level: "kozep" }, { topic: "Habsburg Birodalom", level: "kozep" },
+      { topic: "Kereszténység", level: "kozep" }, { topic: "Iszlám", level: "kozep" },
+      { topic: "Buddhizmus", level: "kozep" }, { topic: "Judaizmus", level: "kozep" },
+      { topic: "Reformáció", level: "kozep" }, { topic: "Katolicizmus", level: "kozep" },
+      { topic: "Evangélikus vallás", level: "kozep" }, { topic: "Református vallás", level: "kozep" },
+      { topic: "Felvilágosodás", level: "kozep" }, { topic: "Nacionalizmus", level: "kozep" },
+      { topic: "Liberalizmus", level: "kozep" }, { topic: "Szocializmus", level: "kozep" },
+      { topic: "Konzervativizmus", level: "kozep" }, { topic: "Fasizmus", level: "kozep" },
+      { topic: "Kommunizmus", level: "kozep" }, { topic: "Humanizmus", level: "kozep" },
+      { topic: "Aranybulla", level: "kozep" }, { topic: "Magna Charta", level: "kozep" },
+      { topic: "Áprilisi törvények", level: "kozep" }, { topic: "Trianoni békeszerződés", level: "kozep" },
+      { topic: "Függetlenségi Nyilatkozat", level: "kozep" }, { topic: "ENSZ", level: "kozep" },
+      { topic: "NATO", level: "kozep" }, { topic: "Európai Unió", level: "kozep" },
+      { topic: "Varsói Szerződés", level: "kozep" }, { topic: "Spártai állam", level: "kozep" },
+      { topic: "Macedón Birodalom", level: "kozep" }, { topic: "Szent Német-Római Birodalom", level: "kozep" },
+      { topic: "Brit Birodalom", level: "kozep" }, { topic: "Francia Királyság", level: "kozep" },
+      { topic: "Avar Kaganátus", level: "emelt" }, { topic: "Kazár Birodalom", level: "emelt" },
+      { topic: "Vatikán", level: "kozep" }, { topic: "Ötvenek Tanácsa", level: "emelt" },
+      { topic: "Areioszpagosz", level: "emelt" }, { topic: "Néptörvényszék (Héliaia)", level: "emelt" },
+      { topic: "Plebiszitum", level: "emelt" }, { topic: "Konzulátus", level: "kozep" },
+      { topic: "Triumvirátus", level: "kozep" }, { topic: "Kancellária", level: "kozep" },
+      { topic: "Királyi Tanács", level: "kozep" }, { topic: "Helytartótanács", level: "emelt" },
+      { topic: "Magyar Kamara", level: "emelt" }, { topic: "Rendi országgyűlés", level: "kozep" },
+      { topic: "Főrendiház", level: "kozep" }, { topic: "Képviselőház", level: "kozep" },
+      { topic: "Központi Bizottság (pártvezetés)", level: "kozep" }, { topic: "Politikai Bizottság", level: "emelt" },
+      { topic: "Nemzeti Kerekasztal", level: "kozep" }, { topic: "Ellenzéki Kerekasztal", level: "emelt" },
+      { topic: "Állami Egyházügyi Hivatal", level: "emelt" }, { topic: "GULAG", level: "kozep" },
+      { topic: "Recski kényszermunkatábor", level: "kozep" }, { topic: "Nemzetek Szövetsége", level: "kozep" },
+      { topic: "Komintern", level: "emelt" }, { topic: "Gestapo", level: "kozep" },
+      { topic: "KGB", level: "kozep" }, { topic: "CIA", level: "kozep" },
+      { topic: "Vörös Hadsereg", level: "kozep" }, { topic: "Wehrmacht", level: "kozep" },
+      { topic: "Szent Liga", level: "kozep" }, { topic: "Hármas Szövetség", level: "kozep" },
+      { topic: "Antant", level: "kozep" }, { topic: "Nemzeti Gárda", level: "emelt" },
+      { topic: "Cserkészmozgalom", level: "emelt" }, { topic: "Úttörőszövetség", level: "kozep" },
+      { topic: "KISZ (Kommunista Ifjúsági Szövetség)", level: "kozep" }, { topic: "MEFESZ", level: "emelt" },
+      { topic: "Nemzeti Bank", level: "kozep" }, { topic: "Magyar Tudományos Akadémia", level: "kozep" },
+      { topic: "Nemzeti Színház", level: "kozep" }, { topic: "Pannonhalmi Apátság", level: "emelt" },
+      { topic: "Végvárrendszer", level: "kozep" }, { topic: "Pasalik (Közigazgatási egység)", level: "emelt" },
+      { topic: "Vilajet", level: "emelt" }, { topic: "Szandzsák", level: "emelt" },
+      { topic: "Görögkeleti egyház", level: "kozep" }, { topic: "Görögkatolikus egyház", level: "emelt" },
+      { topic: "Unitárius egyház", level: "emelt" }, { topic: "Habsburg-Lotharingiai-ház", level: "kozep" },
+      { topic: "Jagelló-ház", level: "emelt" }, { topic: "Anjou-ház", level: "kozep" }
+    ];
+
+    // ÁLLAPOT (State)
+    const state = {
+      view: 'LOBBY', 
+      players: [],
+      impostorCount: 1,
+      currentPlayerIndex: 0,
+      currentTopic: '',
+      currentImpostors: [],
+      history: []
+    };
+
+    // AKCIÓK
+    window.addPlayer = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('playerNameInput');
+      const name = input.value.trim();
+      if (name && state.players.length < 10 && !state.players.includes(name)) {
+        state.players.push(name);
+        input.value = '';
+        render();
+      }
+    };
+
+    window.removePlayer = function(index) {
+      state.players.splice(index, 1);
+      if (state.players.length < 5 && state.impostorCount === 2) {
+        state.impostorCount = 1;
+      }
+      render();
+    };
+
+    window.setImpostorCount = function(count) {
+      if (count === 2 && state.players.length < 5) return;
+      state.impostorCount = count;
+      render();
+    };
+
+    window.startRound = function() {
+      if (state.players.length < 3) return alert("Minimum 3 játékos kell!");
+      if (state.impostorCount >= state.players.length) return alert("Túl sok az imposztor!");
+
+      const randomItem = historyTopics[Math.floor(Math.random() * historyTopics.length)];
+      state.currentTopic = randomItem.topic;
+
+      const shuffled = [...state.players].sort(() => 0.5 - Math.random());
+      state.currentImpostors = shuffled.slice(0, state.impostorCount);
+
+      state.currentPlayerIndex = 0;
+      triggerViewTransition('PASS');
+    };
+
+    window.goToReveal = function() {
+      triggerViewTransition('REVEAL');
+    };
+
+    window.handleRevealDone = function() {
+      if (state.currentPlayerIndex + 1 < state.players.length) {
+        state.currentPlayerIndex++;
+        triggerViewTransition('PASS');
+      } else {
+        triggerViewTransition('DISCUSSION');
+      }
+    };
+
+    window.finishRound = function() {
+      state.history.unshift({
+        topic: state.currentTopic,
+        impostors: [...state.currentImpostors]
+      });
+      triggerViewTransition('HISTORY');
+    };
+
+    window.setView = function(newView) {
+      triggerViewTransition(newView);
+    };
+
+    function triggerViewTransition(newView) {
+      const app = document.getElementById('app');
+      app.classList.remove('view-transition');
+      void app.offsetWidth; 
+      state.view = newView;
+      app.classList.add('view-transition');
+      render();
+    }
+
+    // RENDERING LOGIKA
+    function render() {
+      const app = document.getElementById('app');
+      
+      if (state.view === 'LOBBY') {
+        let playerListHTML = '';
+        if (state.players.length === 0) {
+          playerListHTML = '<span class="text-slate-500 text-sm italic py-2 block text-center">Nincs még hozzáadva senki. Írj be neveket!</span>';
+        } else {
+          playerListHTML = state.players.map((p, idx) => `
+            <div class="bg-slate-700/50 backdrop-blur-sm border border-slate-600/30 px-3.5 py-2 rounded-xl flex items-center justify-between gap-2 text-sm font-semibold shadow-sm">
+              <span class="text-slate-200">${p}</span>
+              <button onclick="window.removePlayer(${idx})" class="text-rose-400 font-bold hover:text-rose-300 px-1 text-base transition-colors">&times;</button>
+            </div>
+          `).join('');
+        }
+
+        let impostorWarning = '';
+        if (state.players.length < 5) {
+          impostorWarning = '<p class="text-[11px] text-slate-500 mt-2 text-center tracking-wide">💡 2 imposztorhoz legalább 5 játékos szükséges.</p>';
+        }
+
+        let historyButton = '';
+        if (state.history.length > 0) {
+          historyButton = '<button onclick="window.setView(\'HISTORY\')" class="w-full mt-5 text-slate-400 hover:text-yellow-500 text-xs tracking-wider uppercase font-bold text-center block transition-colors">← Előző körök megtekintése</button>';
+        }
+
+        app.innerHTML = `
+          <div class="flex flex-col items-center">
+            <div class="text-center mb-8">
+              <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 tracking-tight drop-shadow-sm">TÖRI IMPOSZTOR</h1>
+              <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1.5">Mega 500-as Kiadás</p>
+            </div>
+
+            <div class="w-full bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-slate-800 shadow-yellow-500/[0.02]">
+              <form onsubmit="window.addPlayer(event); return false;" class="flex gap-2 mb-6">
+                <input 
+                  type="text" 
+                  id="playerNameInput"
+                  placeholder="Játékos neve..." 
+                  maxLength="12"
+                  class="flex-1 bg-slate-800/80 border border-slate-700 text-white px-4 py-3.5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 text-sm font-semibold placeholder-slate-500 transition-all"
+                />
+                <button type="submit" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 px-6 rounded-2xl font-black text-xl shadow-md transition-all active:scale-95">
+                  +
+                </button>
+              </form>
+
+              <div class="mb-6">
+                <div class="flex justify-between items-center mb-2.5">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Résztvevők</h3>
+                  <span class="text-xs font-bold text-slate-500 bg-slate-800/60 px-2 py-0.5 rounded-md">${state.players.length} / 10</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-0.5">
+                  ${playerListHTML}
+                </div>
+              </div>
+
+              <div class="mb-8">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Imposztorok Száma</h3>
+                <div class="flex gap-2">
+                  <button 
+                    onclick="window.setImpostorCount(1)"
+                    class="flex-1 py-3 rounded-2xl font-extrabold text-sm tracking-wide transition-all border ${state.impostorCount === 1 ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 border-transparent shadow-lg shadow-yellow-500/10' : 'bg-slate-800/40 text-slate-400 border-slate-700/50 hover:bg-slate-800'}"
+                  >
+                    1 Imposztor
+                  </button>
+                  <button 
+                    onclick="window.setImpostorCount(2)"
+                    ${state.players.length < 5 ? 'disabled' : ''}
+                    class="flex-1 py-3 rounded-2xl font-extrabold text-sm tracking-wide transition-all border ${state.impostorCount === 2 ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 border-transparent shadow-lg shadow-yellow-500/10' : 'bg-slate-800/40 text-slate-400 border-slate-700/50 hover:bg-slate-800'} disabled:opacity-20 disabled:cursor-not-allowed"
+                  >
+                    2 Imposztor
+                  </button>
+                </div>
+                ${impostorWarning}
+              </div>
+
+              <button 
+                onclick="window.startRound()"
+                ${state.players.length < 3 ? 'disabled' : ''}
+                class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:brightness-110 text-white text-lg font-black py-4 rounded-2xl shadow-xl shadow-emerald-950/20 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100"
+              >
+                Kör Indítása ⚔️
+              </button>
+              
+              ${historyButton}
+            </div>
+          </div>
+        `;
+      }
+
+      else if (state.view === 'PASS') {
+        app.innerHTML = `
+          <div class="text-center py-10 bg-slate-900/40 border border-slate-800/60 p-8 rounded-3xl backdrop-blur-md shadow-2xl">
+            <span class="inline-block px-3 py-1 bg-slate-800 rounded-full text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Pass-and-Play</span>
+            <h2 class="text-lg text-slate-400 font-medium mb-1">Add át a készüléket:</h2>
+            <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400 mb-14 tracking-tight break-words px-2">${state.players[state.currentPlayerIndex]}</h1>
+            
+            <button 
+              onclick="window.goToReveal()"
+              class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:brightness-110 text-white text-lg font-extrabold py-4.5 px-8 rounded-2xl shadow-xl shadow-blue-950/50 active:scale-95 transition-all w-full max-w-xs mx-auto block"
+            >
+              Kattints a megtekintéshez
+            </button>
+          </div>
+        `;
+      }
+
+      else if (state.view === 'REVEAL') {
+        const isImpostor = state.currentImpostors.includes(state.players[state.currentPlayerIndex]);
+        
+        if (isImpostor) {
+          app.innerHTML = `
+            <div class="fixed inset-0 bg-gradient-to-b from-rose-950 via-rose-900 to-black flex flex-col items-center justify-between p-6 text-center">
+              <div class="my-auto max-w-xs">
+                <span class="text-xs font-black tracking-widest text-rose-400 bg-rose-950/80 border border-rose-800 px-4 py-1.5 rounded-full uppercase mb-4 inline-block">Szigorúan Titkos</span>
+                <h1 class="text-6xl font-black text-white mb-6 tracking-normal drop-shadow-lg">IMPOSZTOR</h1>
+                <p class="text-base text-rose-200/90 leading-relaxed font-medium">Nincs titkos tételed. Figyelj a többiek homályos utalásaira, és próbálj meg észrevétlenül beolvadni!</p>
+              </div>
+              <button 
+                onclick="window.handleRevealDone()"
+                class="w-full max-w-xs bg-white text-rose-950 text-lg font-black py-4 rounded-2xl shadow-2xl hover:bg-rose-50 active:scale-95 transition-all mb-4"
+              >
+                Képernyő lezárása
+              </button>
+            </div>
+          `;
+        } else {
+          app.innerHTML = `
+            <div class="fixed inset-0 bg-gradient-to-b from-emerald-950 via-emerald-900 to-black flex flex-col items-center justify-between p-6 text-center">
+              <div class="my-auto w-full max-w-sm px-4">
+                <span class="text-xs font-black tracking-widest text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-4 py-1.5 rounded-full uppercase mb-5 inline-block">Békés Polgár</span>
+                <p class="text-xs uppercase tracking-widest text-emerald-300/70 font-bold mb-3">A titkos történelem tétel:</p>
+                
+                <div class="bg-emerald-950/90 border-2 border-emerald-500/40 rounded-2xl p-6 shadow-2xl shadow-black/50 mb-5 backdrop-blur-sm">
+                  <h2 class="text-3xl font-black text-white tracking-tight leading-snug">${state.currentTopic}</h2>
+                </div>
+                
+                <p class="text-xs text-emerald-200/80 italic leading-relaxed max-w-xs mx-auto">Mondj egy okos kulcsszót vagy utalást, amiből a társaid tudják, hogy képben vagy, de az Imposztor ne jöjjön rá!</p>
+              </div>
+              <button 
+                onclick="window.handleRevealDone()"
+                class="w-full max-w-xs bg-white text-emerald-950 text-lg font-black py-4 rounded-2xl shadow-2xl hover:bg-emerald-50 active:scale-95 transition-all mb-4"
+              >
+                Képernyő lezárása
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      else if (state.view === 'DISCUSSION') {
+        app.innerHTML = `
+          <div class="text-center py-8 bg-slate-900/60 border border-slate-800 p-6 rounded-3xl backdrop-blur-md shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-500 text-slate-950 text-3xl flex items-center justify-center font-bold rounded-2xl mx-auto mb-6 shadow-xl shadow-yellow-500/10 animate-pulse">📢</div>
+            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-400 mb-4 tracking-tight">Kezdődik a vita!</h1>
+            <p class="text-slate-300 text-sm leading-relaxed mb-8 px-2">
+              Mindenki megnézte a lapját, tegyétek a telefont az asztal közepére. <br><br>
+              Menjetek körbe: mindenki mondjon <b>egyetlen rövid nyomot</b>, majd indulhat a gyanúsítgatás és az élő szavazás!
+            </p>
+            
+            <button 
+              onclick="window.finishRound()"
+              class="w-full max-w-xs bg-gradient-to-r from-emerald-500 to-teal-600 hover:brightness-110 text-white text-lg font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all block mx-auto"
+            >
+              Kör Vége (Megoldás)
+            </button>
+          </div>
+        `;
+      }
+
+      else if (state.view === 'HISTORY') {
+        let historyCardsHTML = state.history.map((round, idx) => `
+          <div class="bg-slate-800/40 backdrop-blur-sm p-4 rounded-2xl border border-slate-700/40 shadow-sm text-left">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] font-black text-slate-500 tracking-wider uppercase">${state.history.length - idx}. FORDULÓ</span>
+            </div>
+            <div class="font-black text-lg text-white tracking-tight leading-tight mb-2.5">${round.topic}</div>
+            <div class="text-xs text-rose-400 font-semibold flex items-center gap-1.5">
+              <span class="text-slate-500 font-medium">Imposztor:</span> 
+              <span class="bg-rose-950/40 px-2 py-0.5 rounded-lg border border-rose-900/50 text-rose-300 font-bold">${round.impostors.join(', ')}</span>
+            </div>
+          </div>
+        `).join('');
+
+        app.innerHTML = `
+          <div class="w-full py-2">
+            <div class="text-center mb-6">
+              <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 tracking-tight uppercase">Múltbéli Körök</h1>
+              <p class="text-slate-500 text-xs mt-0.5">A meccsek részletei (helyi session)</p>
+            </div>
+            
+            <div class="space-y-3 max-h-[50vh] overflow-y-auto p-0.5 mb-8">
+              ${historyCardsHTML}
+            </div>
+
+            <div class="flex gap-3">
+              <button 
+                onclick="window.startRound()"
+                class="flex-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black py-4 rounded-2xl shadow-lg shadow-yellow-500/5 transition-all active:scale-95 hover:brightness-110"
+              >
+                Új kör indítása
+              </button>
+              <button 
+                onclick="window.setView('LOBBY')"
+                class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-4 rounded-2xl shadow-md transition-all active:scale-95 border border-slate-700/50"
+              >
+                Főmenü
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Első renderelés indítása
+    render();
+  </script>
+</body>
+</html>
